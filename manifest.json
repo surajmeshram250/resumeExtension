@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "My Resume Editor",
+  "version": "1.0",
+  "description": "Edit and print your resume",
+  "action": {
+    "default_title": "Open Resume Editor"
+  },
+  "background": {
+    "service_worker": "script.js"
+  },
+  "permissions": ["tabs"],
+  "icons": {}
+}

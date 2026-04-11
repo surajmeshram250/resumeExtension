@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style id="resume-custom-style"></style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ TOOLBAR ════════════════════════════ -->
+<div id="toolbar">
+  <div id="toolbar-row1">
+    <div class="tb-group">
+      <button class="tb-btn" id="editBtn">✏️ Edit</button>
+      <button class="tb-btn" id="saveBtn" style="display:none">💾 Save</button>
+      <button class="tb-btn" id="printBtn">🖨️ Download PDF</button>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-group">
+      <span class="tb-label">Template</span>
+      <button class="tb-btn active" id="templateClassicBtn">Classic</button>
+      <button class="tb-btn" id="templateAltBtn">Alternate</button>
+    </div>
+    <span id="status">View mode</span>
+  </div>
+  <div id="toolbar-row2">
+    <div class="tb-group">
+      <span class="tb-label">Font</span>
+      <select class="tb-select" id="fontSelect" style="min-width:110px">
+        <option value="Inter">Inter</option>
+        <option value="Open Sans">Open Sans</option>
+        <option value="Merriweather">Merriweather</option>
+        <option value="Roboto">Roboto</option>
+        <option value="Lato">Lato</option>
+        <option value="Georgia">Georgia</option>
+      </select>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-group">
+      <span class="tb-label">Size</span>
+      <div class="font-size-control">
+        <button id="fontDecBtn" title="Decrease font size">−</button>
+        <span id="fontSizeDisplay">13</span>
+        <button id="fontIncBtn" title="Increase font size">+</button>
+      </div>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-group">
+      <span class="tb-label">Line height</span>
+      <select class="tb-select" id="lineHeightSelect">
+        <option value="1.2">1.2</option>
+        <option value="1.3">1.3</option>
+        <option value="1.4">1.4</option>
+        <option value="1.5" selected>1.5</option>
+        <option value="1.6">1.6</option>
+        <option value="1.7">1.7</option>
+        <option value="1.8">1.8</option>
+      </select>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-group">
+      <span class="tb-label">Spacing</span>
+      <select class="tb-select" id="sectionSpacingSelect">
+        <option value="8">Tight</option>
+        <option value="12">Compact</option>
+        <option value="16" selected>Normal</option>
+        <option value="22">Relaxed</option>
+        <option value="30">Loose</option>
+      </select>
+    </div>
+    <div class="tb-sep"></div>
+    <div class="tb-group">
+      <span class="tb-label">Text</span>
+      <label class="color-picker-wrap" title="Text color">
+        <span>T</span>
+        <input type="color" id="textColorPicker" value="#333333">
+      </label>
+    </div>
+    <div class="tb-group">
+      <span class="tb-label">Accent</span>
+      <label class="color-picker-wrap" title="Accent / header color">
+        <span>A</span>
+        <input type="color" id="accentColorPicker" value="#1a1a2e">
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ RESUME ══════════════════════════════ -->
+<div class="resumePreviewContainer">
+  <div class="resumePreview classic-template" id="mypdf">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="name"><h3>First and Last Name</h3></div>
+      <div class="details">
+        <p>
+          Phone Number &nbsp;|&nbsp;
+          <a href="mailto:email@example.com">Email Address</a> &nbsp;|&nbsp;
+          <a href="https://linkedin.com/in/studentname" target="_blank" rel="noopener noreferrer">linkedin.com/in/studentname</a> &nbsp;|&nbsp;
+          <a href="https://yourportfolio.com" target="_blank" rel="noopener noreferrer">yourportfolio.com</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="body">
+
+      <!-- Education -->
+      <div class="education">
+        <h3 class="education-heading">Education</h3>
+
+        <section class="education-section">
+          <div class="education-sub"><p class="right">Anticipated May 2026</p></div>
+          <div class="edu-details">
+            <p class="course-label">Bowie State University, Bowie, MD</p>
+            <p class="degree-line">Bachelor of Science in Computer Science</p>
+            <p>Concentration: Software Engineering &nbsp;|&nbsp; Minor: Mathematics</p>
+            <p>GPA: 3.8 / 4.0</p>
+            <p>Dean's List (Fall 2023, Spring 2024) &nbsp;|&nbsp; Merit Scholarship Recipient</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Relevant Coursework -->
+      <div class="coursework">
+        <h3 class="coursework-heading">Relevant Coursework</h3>
+        <div class="course-grid">
+          <span>Data Structures</span>
+          <span>Algorithms</span>
+          <span>Database Systems</span>
+          <span>Operating Systems</span>
+          <span>Software Engineering</span>
+          <span>Computer Networks</span>
+        </div>
+      </div>
+
+      <!-- Work Experience -->
+      <div class="work-exp">
+        <h3 class="work-heading">Work Experience</h3>
+
+        <div class="work-info">
+          <div class="work-detail">
+            <h3>Company Name, City, State</h3>
+            <p>Month Year – Month Year</p>
+          </div>
+          <p class="job-title">Job Title</p>
+          <div class="work-desc">
+            <ul>
+              <li>Lead bulleted statement with an action verb. Use past tense if no longer in the position or performing the task.</li>
+              <li>Reviewed data and researched ideas to increase membership and improve overall team efficiency by 20%.</li>
+              <li>Collaborated with cross-functional teams to deliver project milestones ahead of schedule.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="work-info">
+          <div class="work-detail">
+            <h3>Second Employer, City, State</h3>
+            <p>Month Year – Present</p>
+          </div>
+          <p class="job-title">Job Title</p>
+          <div class="work-desc">
+            <ul>
+              <li>Describe your responsibilities using strong action verbs that demonstrate impact.</li>
+              <li>Quantify results wherever possible (e.g., percentages, dollar amounts, team size).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects -->
+      <div class="project">
+        <h3 class="project-heading">Projects</h3>
+
+        <section class="project-info">
+          <div class="project-detail">
+            <h3>Name of Project</h3>
+            <p>Month Year – Month Year</p>
+          </div>
+          <div class="project-desc">
+            <ul>
+              <li>In a team comprised of four, completed several business simulations in which students made decisions about pricing, amount of the product to make, paying for materials immediately or on credit, and taking out loans.</li>
+              <li>Team won distinction for "The Most Profitable Firm" in the simulation for the Commercial Banking class.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="project-info">
+          <div class="project-detail">
+            <h3>Second Project Name</h3>
+            <p>Month Year – Present</p>
+          </div>
+          <div class="project-desc">
+            <ul>
+              <li>Describe your project using strong action verbs; include team size, skills used, and key accomplishments.</li>
+              <li>Highlight any awards, recognition, or measurable outcomes from the project.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <!-- Skills -->
+      <div class="skills">
+        <h3>Skills</h3>
+        <div class="skill-list">
+          <span>MS Word</span>
+          <span>MS PowerPoint</span>
+          <span>MS Excel</span>
+          <span>Google Docs</span>
+          <span>Adobe Suite</span>
+          <span>Spanish (Intermediate)</span>
+        </div>
+      </div>
+
+    </div><!-- /body -->
+  </div><!-- /mypdf -->
+</div>
+
+<script src="resume.js"></script>
+</body>
+</html>
