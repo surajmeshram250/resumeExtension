@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   restoreResume();
   bindToolbar();
+  bindUpload();
   applyTemplate(settings.template);
   applyAdjustments();
   syncToolbarUI();
@@ -89,6 +90,22 @@ function flashStatus(msg) {
   setTimeout(() => {
     el.textContent = isEditing ? 'Edit mode – click text to edit' : 'View mode';
   }, 1400);
+}
+
+function showToast(msg, type = 'info') {
+  const el = q('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { el.className = ''; }, 3200);
+}
+
+function showLoader(on, msg) {
+  const o = q('loadingOverlay');
+  if (!o) return;
+  if (msg) o.querySelector('.loading-text').textContent = msg;
+  o.classList.toggle('visible', !!on);
 }
 
 function sanitizeDom() {
@@ -153,19 +170,14 @@ function applyAdjustments() {
   };
   const fontStack = fontMap[settings.fontFamily] || "'Inter', sans-serif";
 
-  // Classic template uses relative sizing naturally from base font-size.
-  // Alternate template has fixed px sizes baked into CSS (16px, 35px, 18px, 14px).
-  // We scale them proportionally using the user's chosen size vs the default of 13.
   const scale = settings.fontSize / 13;
-
-  // Alternate base sizes (from static CSS)
-  const altName     = Math.round(35 * scale);   // .header .name h3
-  const altDesig    = Math.round(16 * scale);   // .header .desgination h4
-  const altDetail   = Math.round(16 * scale);   // .header .details p
-  const altHeading  = Math.round(18 * scale);   // section h3 headings
-  const altBody     = Math.round(16 * scale);   // body text, li, p
-  const altSkill    = Math.round(14 * scale);   // skill chips
-  const altMeta     = Math.round(16 * scale);   // work/project detail meta (dates)
+  const altName     = Math.round(35 * scale);
+  const altDesig    = Math.round(16 * scale);
+  const altDetail   = Math.round(16 * scale);
+  const altHeading  = Math.round(18 * scale);
+  const altBody     = Math.round(16 * scale);
+  const altSkill    = Math.round(14 * scale);
+  const altMeta     = Math.round(16 * scale);
 
   style.textContent = `
     #mypdf {
@@ -176,77 +188,42 @@ function applyAdjustments() {
       line-height: ${settings.lineHeight};
       font-family: ${fontStack};
     }
-
-    /* ── Classic font override ── */
-    #mypdf.classic-template,
-    #mypdf.classic-template p,
-    #mypdf.classic-template li,
-    #mypdf.classic-template h3,
-    #mypdf.classic-template h4,
-    #mypdf.classic-template span,
+    #mypdf.classic-template, #mypdf.classic-template p, #mypdf.classic-template li,
+    #mypdf.classic-template h3, #mypdf.classic-template h4, #mypdf.classic-template span,
     #mypdf.classic-template a { font-family: ${fontStack}; }
-
-    /* ── Alternate font override ── */
-    #mypdf.template-alt,
-    #mypdf.template-alt p,
-    #mypdf.template-alt li,
-    #mypdf.template-alt h3,
-    #mypdf.template-alt h4,
-    #mypdf.template-alt span,
+    #mypdf.template-alt, #mypdf.template-alt p, #mypdf.template-alt li,
+    #mypdf.template-alt h3, #mypdf.template-alt h4, #mypdf.template-alt span,
     #mypdf.template-alt a { font-family: ${fontStack}; }
-
-    /* ── Alternate proportional font sizes ── */
     #mypdf.template-alt .header .name h3     { font-size: ${altName}px; }
     #mypdf.template-alt .header .desgination h4 { font-size: ${altDesig}px; }
     #mypdf.template-alt .header .details p   { font-size: ${altDetail}px; }
-
-    #mypdf.template-alt h3.work-heading,
-    #mypdf.template-alt h3.project-heading,
-    #mypdf.template-alt h3.education-heading,
-    #mypdf.template-alt h3.add-heading,
-    #mypdf.template-alt .body > * > h3       { font-size: ${altHeading}px; }
-
-    #mypdf.template-alt .summary p,
-    #mypdf.template-alt .work-desc ul li,
-    #mypdf.template-alt .project-desc ul li,
-    #mypdf.template-alt .edu-details p,
-    #mypdf.template-alt .hobbies            { font-size: ${altBody}px; }
-
-    #mypdf.template-alt .skill-list span    { font-size: ${altSkill}px; }
-
-    #mypdf.template-alt .work-detail h3,
-    #mypdf.template-alt .project-detail h3  { font-size: ${altMeta}px; }
-    #mypdf.template-alt .work-detail p,
-    #mypdf.template-alt .project-detail p,
+    #mypdf.template-alt h3.work-heading, #mypdf.template-alt h3.project-heading,
+    #mypdf.template-alt h3.education-heading, #mypdf.template-alt h3.add-heading,
+    #mypdf.template-alt .body > * > h3 { font-size: ${altHeading}px; }
+    #mypdf.template-alt .summary p, #mypdf.template-alt .work-desc ul li,
+    #mypdf.template-alt .project-desc ul li, #mypdf.template-alt .edu-details p,
+    #mypdf.template-alt .hobbies { font-size: ${altBody}px; }
+    #mypdf.template-alt .skill-list span { font-size: ${altSkill}px; }
+    #mypdf.template-alt .work-detail h3, #mypdf.template-alt .project-detail h3 { font-size: ${altMeta}px; }
+    #mypdf.template-alt .work-detail p, #mypdf.template-alt .project-detail p,
     #mypdf.template-alt .education-sub p.right { font-size: ${altMeta}px; }
-
-    /* ── Section spacing ── */
     #mypdf .summary, #mypdf .skills, #mypdf .work-exp,
     #mypdf .project, #mypdf .education, #mypdf .additional {
       margin-bottom: ${settings.sectionSpacing}px;
     }
     #mypdf p, #mypdf li { line-height: ${settings.lineHeight}; }
-
-    /* ── Classic accent colors ── */
     #mypdf.classic-template .header { background: ${settings.accentColor}; }
-    #mypdf.classic-template .body > * > h3,
-    #mypdf.classic-template h3.work-heading,
-    #mypdf.classic-template h3.project-heading,
-    #mypdf.classic-template h3.education-heading,
+    #mypdf.classic-template .body > * > h3, #mypdf.classic-template h3.work-heading,
+    #mypdf.classic-template h3.project-heading, #mypdf.classic-template h3.education-heading,
     #mypdf.classic-template h3.add-heading {
       color: ${settings.accentColor};
       border-bottom-color: ${settings.accentColor};
     }
-    #mypdf.classic-template .work-detail h3,
-    #mypdf.classic-template .project-detail h3,
+    #mypdf.classic-template .work-detail h3, #mypdf.classic-template .project-detail h3,
     #mypdf.classic-template .lang { color: ${settings.accentColor}; }
-
-    /* ── Alternate accent colors ── */
     #mypdf.template-alt .header .details a { color: ${settings.accentColor}; }
-    #mypdf.template-alt .body > * > h3,
-    #mypdf.template-alt h3.work-heading,
-    #mypdf.template-alt h3.project-heading,
-    #mypdf.template-alt h3.education-heading,
+    #mypdf.template-alt .body > * > h3, #mypdf.template-alt h3.work-heading,
+    #mypdf.template-alt h3.project-heading, #mypdf.template-alt h3.education-heading,
     #mypdf.template-alt h3.add-heading {
       background-color: color-mix(in srgb, ${settings.accentColor} 16%, white);
       border-color: color-mix(in srgb, ${settings.accentColor} 18%, white);
@@ -425,4 +402,246 @@ function addSkill() {
   list.appendChild(skill);
   skill.focus();
   selectAll(skill);
+}
+
+/* ══════════════════════════════════════════════════
+   FILE UPLOAD + REGEX-BASED AUTO FILL (no AI)
+══════════════════════════════════════════════════ */
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+}
+
+function bindUpload() {
+  q('uploadBtn')?.addEventListener('click', () => {
+    if (!isEditing) {
+      showToast('⚠️ Please click "✏️ Edit" first, then upload your resume.', 'error');
+      return;
+    }
+    q('resumeUpload')?.click();
+  });
+
+  q('resumeUpload')?.addEventListener('change', () => {
+    const input = q('resumeUpload');
+    if (!input.files.length) return;
+    if (!isEditing) {
+      showToast('⚠️ Please click "✏️ Edit" first, then upload your resume.', 'error');
+      input.value = '';
+      return;
+    }
+    const file = input.files[0];
+    const ext = file.name.split('.').pop().toLowerCase();
+    showLoader(true, `Parsing "${file.name}"…`);
+    if (ext === 'pdf') parsePDF(file);
+    else if (ext === 'docx' || ext === 'doc') parseDOCX(file);
+    else if (ext === 'txt') parseTXT(file);
+    else { showLoader(false); showToast('Unsupported file type. Use PDF, DOCX, or TXT.', 'error'); }
+    input.value = '';
+  });
+}
+
+function parsePDF(file) {
+  if (typeof pdfjsLib === 'undefined') {
+    showLoader(false); showToast('PDF.js failed to load.', 'error'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = function () {
+    pdfjsLib.getDocument({ data: new Uint8Array(this.result) }).promise
+      .then(async pdf => {
+        let text = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const tc = await page.getTextContent();
+          let lastY = null;
+          tc.items.forEach(it => {
+            if (lastY !== null && Math.abs(it.transform[5] - lastY) > 2) text += '\n';
+            text += it.str + ' ';
+            lastY = it.transform[5];
+          });
+          text += '\n';
+        }
+        extractAndFill(text);
+      })
+      .catch(err => {
+        console.error(err);
+        showLoader(false);
+        showToast('Could not read PDF — file may be scanned or protected.', 'error');
+      });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseDOCX(file) {
+  if (typeof mammoth === 'undefined') {
+    showLoader(false); showToast('Mammoth.js failed to load.', 'error'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    mammoth.extractRawText({ arrayBuffer: e.target.result })
+      .then(r => extractAndFill(r.value))
+      .catch(err => { console.error(err); showLoader(false); showToast('Could not read DOCX.', 'error'); });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseTXT(file) {
+  const reader = new FileReader();
+  reader.onload = function () { extractAndFill(this.result); };
+  reader.readAsText(file);
+}
+
+function extractAndFill(text) {
+  try {
+    const data = extractFields(text);
+    applyToDOM(data);
+    makeEditable(isEditing);
+    if (isEditing) injectControls();
+    saveData();
+    showLoader(false);
+    showToast('✅ Resume auto-filled. Review & edit as needed.', 'success');
+  } catch (err) {
+    console.error(err);
+    showLoader(false);
+    showToast('Could not extract fields from file.', 'error');
+  }
+}
+
+function extractFields(raw) {
+  const text = raw.replace(/\r/g, '');
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  const email = (text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/) || [''])[0];
+  const phone = (text.match(/(\+?\d[\d\s().-]{7,}\d)/) || [''])[0].trim();
+  const linkedin = (text.match(/(https?:\/\/)?(www\.)?linkedin\.com\/[^\s)]+/i) || [''])[0];
+  const portfolio = (text.match(/https?:\/\/(?!(?:www\.)?linkedin\.com)[^\s)]+/i) || [''])[0];
+
+  let name = '';
+  for (const l of lines.slice(0, 6)) {
+    if (/@|http|\d{3}/.test(l)) continue;
+    if (l.length > 2 && l.length < 60 && /^[A-Za-z][A-Za-z .'-]+$/.test(l)) { name = l; break; }
+  }
+
+  const sections = splitSections(lines);
+
+  return {
+    name, email, phone, linkedin, portfolio,
+    summary: sections.summary || '',
+    skills: parseSkills(sections.skills || ''),
+    experience: parseBlocks(sections.experience || ''),
+    projects: parseBlocks(sections.projects || ''),
+    education: parseBlocks(sections.education || '')
+  };
+}
+
+function splitSections(lines) {
+  const headings = {
+    summary:   /^(summary|profile|objective|about)\b/i,
+    experience:/^(experience|work experience|employment|professional experience)\b/i,
+    education: /^(education|academics|qualifications)\b/i,
+    projects:  /^(projects|personal projects|academic projects)\b/i,
+    skills:    /^(skills|technical skills|technologies|tools)\b/i
+  };
+  const out = {};
+  let current = null;
+  for (const line of lines) {
+    let matched = null;
+    for (const [k, re] of Object.entries(headings)) {
+      if (re.test(line) && line.length < 50) { matched = k; break; }
+    }
+    if (matched) { current = matched; out[current] = out[current] || ''; continue; }
+    if (current) out[current] += line + '\n';
+  }
+  return out;
+}
+
+function parseSkills(block) {
+  return block.split(/[,;•·|\n]/).map(s => s.trim()).filter(s => s && s.length < 40);
+}
+
+function parseBlocks(block) {
+  const chunks = block.split(/\n(?=[A-Z])/).map(c => c.trim()).filter(Boolean);
+  return chunks.map(chunk => {
+    const lines = chunk.split('\n').map(l => l.trim()).filter(Boolean);
+    const title = lines[0] || '';
+    const dateMatch = chunk.match(/((19|20)\d{2}).{0,15}((19|20)\d{2}|present|current)/i);
+    const dates = dateMatch ? dateMatch[0] : (lines[1] || '');
+    const bullets = lines.slice(1).filter(l => l !== dates && l.length > 5);
+    return { title, dates, bullets };
+  });
+}
+
+function applyToDOM(d) {
+  const resume = getResume();
+  const setText = (sel, val) => {
+    if (!val) return;
+    const el = resume.querySelector(sel);
+    if (el) el.textContent = val;
+  };
+
+  setText('.header .name h3, .name h3', d.name);
+
+  const details = resume.querySelector('.header .details, .details');
+  if (details && (d.email || d.phone || d.linkedin)) {
+    const parts = [];
+    if (d.phone)    parts.push(`<p>${d.phone}</p>`);
+    if (d.email)    parts.push(`<p><a href="mailto:${d.email}">${d.email}</a></p>`);
+    if (d.linkedin) parts.push(`<p><a href="${d.linkedin.startsWith('http') ? d.linkedin : 'https://' + d.linkedin}">LinkedIn</a></p>`);
+    if (d.portfolio) parts.push(`<p><a href="${d.portfolio}">Portfolio</a></p>`);
+    details.innerHTML = parts.join('');
+  }
+
+  if (d.summary) {
+    const sum = resume.querySelector('.summary p');
+    if (sum) sum.textContent = d.summary.replace(/\n+/g, ' ').trim();
+  }
+
+  if (d.skills.length) {
+    const list = resume.querySelector('.skill-list');
+    if (list) {
+      list.innerHTML = '';
+      d.skills.forEach(s => {
+        const span = document.createElement('span');
+        span.textContent = s;
+        list.appendChild(span);
+      });
+    }
+  }
+
+  fillBlocks('.work-exp', d.experience, 'work-info', 'work-detail', 'work-desc');
+  fillBlocks('.project', d.projects, 'project-info', 'project-detail', 'project-desc');
+
+  if (d.education.length) {
+    const edu = resume.querySelector('.education');
+    if (edu) {
+      edu.querySelectorAll('.education-section').forEach(n => n.remove());
+      d.education.forEach(item => {
+        const section = document.createElement('section');
+        section.className = 'education-section';
+        section.innerHTML = `
+          <div class="education-sub"><p class="right">${item.dates || ''}</p></div>
+          <div class="edu-details">
+            <p class="course-label">${item.title}</p>
+            ${item.bullets.map(b => `<p>${b}</p>`).join('')}
+          </div>`;
+        edu.appendChild(section);
+      });
+    }
+  }
+}
+
+function fillBlocks(sectionSel, items, wrapperCls, detailCls, descCls) {
+  if (!items.length) return;
+  const container = getResume().querySelector(sectionSel);
+  if (!container) return;
+  container.querySelectorAll('.' + wrapperCls).forEach(n => n.remove());
+  const heading = container.querySelector('h3');
+  items.forEach(item => {
+    const wrap = document.createElement(wrapperCls === 'work-info' ? 'div' : 'section');
+    wrap.className = wrapperCls;
+    wrap.innerHTML = `
+      <div class="${detailCls}"><h3>${item.title}</h3><p>${item.dates || ''}</p></div>
+      <div class="${descCls}"><ul>${item.bullets.map(b => `<li>${b.replace(/^[•·\-*]\s*/, '')}</li>`).join('')}</ul></div>`;
+    if (heading && heading.nextSibling) container.insertBefore(wrap, heading.nextSibling);
+    else container.appendChild(wrap);
+  });
 }
